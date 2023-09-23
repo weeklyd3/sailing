@@ -12,14 +12,16 @@ app.get('/objects/:coord', function(req, res) {
   obj.query = req.params.coord;
   res.send(JSON.stringify(obj));
 })
-// listen for requests :)
-const listener = app.listen(4000, function() {
-  console.log('Your app is listening on port ' + listener.address().port);
-});
 
 const { Server } = require('socket.io');
 const http = require('http');
-const io = new Server(http.createServer(app));
+const server = http.createServer(app);
+const io = new Server(server);
 io.on('connection', (socket) => {
   console.log('a user connected');
+});
+
+// listen for requests :)
+const listener = server.listen(4000, function() {
+  console.log('Your app is listening on port ' + listener.address().port);
 });
