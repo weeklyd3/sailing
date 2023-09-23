@@ -16,3 +16,10 @@ app.get('/objects/:coord', function(req, res) {
 const listener = app.listen(4000, function() {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+
+const { Server } = require('socket.io');
+const http = require('http');
+const io = new Server(http.createServer(app));
+io.on('connection', (socket) => {
+  console.log('a user connected');
+});

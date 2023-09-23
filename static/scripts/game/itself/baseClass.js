@@ -4,8 +4,9 @@ var objects = await require('scripts/game/other-classes/object.js');
 class game {
 	canvasInfo = {width: null, height: null};
 	canvas = null;
-	scale = 0.25;
+	scale = 0.2;
 	constructor(width = 640, height = 480) {
+		this.target = [10000, -1000];
 		this.canvasInfo.width = width;
 		this.canvasInfo.height = height;
 		this.gameInfo = new gameInfo(game);
@@ -20,7 +21,7 @@ class game {
 		this.drawing = new drawing(this.canvas, this);
 		this.updateLoop();
 		this.shipimg = draw.loadImage("images/ship.svg");
-		this.ship = new objects.ship(75, 350, this.shipimg, 5);
+		this.ship = new objects.ship(75, 350, 0, this.shipimg, 5);
 	}
 	updateLoop(fps = 30) {
 		return setInterval(this.updateCanvas.bind(this), fps);
