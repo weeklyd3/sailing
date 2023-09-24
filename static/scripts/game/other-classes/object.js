@@ -19,8 +19,8 @@ class gameObject {
 	}
 }
 class ship extends gameObject {
-	constructor(w, h, speed, image, maxspeed) {
-		super(0, 0, w, h, 'ship', image, speed);
+	constructor(w, h, speed, image, maxspeed, x = 0, y = 0) {
+		super(x, y, w, h, 'ship', image, speed);
 		this.turningSpeed = 1;
 		this.targetAngle = 0;
 		this.currentSpeed = 0;

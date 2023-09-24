@@ -19,12 +19,29 @@ const server = http.createServer(app);
 const io = new Server(server);
 const ships = {};
 var currentId = 1;
+function randomLetter() {
+	return 'ASDFGHJKLZXCVBNMQWERTYUIOP'[Math.floor(Math.random() * 26)];
+}
 io.on('connection', (socket) => {
-  ships[currentId++] = {x: 0, y: 0, angle: 0, particles: []};
-	socket.emit('id', currentId - 1);
+  ships[currentId++] = {x: 0, y: 0, angle: 0, particles: [], callsign: randomLetter() + randomLetter() + randomLetter(), id: currentId - 1};
+	socket.emit('id-reveal', {id: currentId - 1, callsign: ships[currentId - 1].callsign});
+	var shipid = currentId - 1;
   console.log('a user connected');
+	socket.broadcast.emit('ship join', ships[shipid]);
+	socket.on('position change', (newpos) => {
+		ships[shipid].x = newpos.x;
+		ships[shipid].y = newpos.y;
+		ships[shipid].angle = newpos.angle;
+		socket.broadcast.emit('ship change', {id: shipid, ship: ships[shipid]});
+	})
+	socket.on('ship request', () => {
+		var clone = JSON.parse(JSON.stringify(ships));
+		delete clone[shipid];
+		socket.emit('ship get', clone);
+	})
   socket.on('disconnect', () => {
 	  console.log('disconnect');
+	  delete ships[shipid];
   });
 });
 

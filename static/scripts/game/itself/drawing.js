@@ -2,6 +2,7 @@ class drawing {
 	constructor(canvas, game) {
 		this.canvas = canvas;
 		this.game = game;
+		this.fcount = 0;
 	}
 	movePointAtAngle(point, angle, distance) {
 		angle = angle * (Math.PI / 180);
@@ -17,6 +18,7 @@ class drawing {
 		return angle % 360;
 	}
 	shortcuts() {
+		this.fcount++;
 		if (this.canvas.keyIsDown(37)) this.game.ship.turn(this.game.ship.angle - this.game.ship.turningSpeed);
 		if (this.canvas.keyIsDown(39)) this.game.ship.turn(this.game.ship.angle + this.game.ship.turningSpeed);
 		var speedChange = 0;
@@ -25,6 +27,7 @@ class drawing {
 		this.game.ship.currentSpeed += speedChange * 0.1;
 		if (this.game.ship.currentSpeed < 0) this.game.ship.currentSpeed = 0;
 		if (this.game.ship.currentSpeed > this.game.ship.maxSpeed) this.game.ship.currentSpeed = this.game.ship.maxSpeed;
+		if (!(this.fcount % 2)) socket.emit('position change', {x: this.game.ship.x, y: this.game.ship.y, angle: this.game.ship.angle});
 	}
 	drawBackgroundAndShip() {
 		this.shortcuts();
@@ -36,7 +39,8 @@ class drawing {
 		this.canvas.rect(0, 0, this.canvas.width, this.canvas.height);
 		this.canvas.textAlign('left', 'top');
 		this.canvas.fill('black');
-		this.canvas.text(`[${this.game.ship.x.toFixed(2)}, ${this.game.ship.y.toFixed(2)}]\nSpeed: ${this.game.ship.currentSpeed}`, 0, 0);
+		this.canvas.text(`[${this.game.ship.x.toFixed(2)}, ${this.game.ship.y.toFixed(2)}]\nSpeed: ${this.game.ship.currentSpeed}\n${ssi.id ? `${ssi.callsign} #${ssi.id}` : ''}`, 0, 0);
+		for (const f of Object.values(this.game.shipCache)) f.draw(this.game.ship.x, this.game.ship.y, this.canvas, this.game.scale);
 		if (this.game.ship) this.game.ship.draw(this.game.ship.x, this.game.ship.y, this.canvas, this.game.scale);
 	}
 }

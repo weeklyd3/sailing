@@ -5,6 +5,7 @@ class game {
 	canvasInfo = {width: null, height: null};
 	canvas = null;
 	scale = 0.2;
+	shipCache = {};
 	constructor(width = 640, height = 480) {
 		this.target = [10000, -1000];
 		this.canvasInfo.width = width;
@@ -28,6 +29,10 @@ class game {
 	}
 	updateCanvas() {
 		if (!this.canvas) return console.log(`canvas not loaded`);
+		for (const ship of Object.values(ssi.foreignShips)) {
+			if (this.shipCache[ship.id]) continue;
+			this.shipCache[ship.id] = new objects.ship(75, 350, 0, this.shipimg, 5, ship.x, ship.y);
+		}
 		this.canvas.clear();
 		this.drawing.drawBackgroundAndShip();
 	}
