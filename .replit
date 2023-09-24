@@ -1,1 +1,3 @@
 run = "node index.js"
+language = "node.js"
+entrypoint = "index.js"
