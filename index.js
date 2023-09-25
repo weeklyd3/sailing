@@ -23,26 +23,31 @@ function randomLetter() {
 	return 'ASDFGHJKLZXCVBNMQWERTYUIOP'[Math.floor(Math.random() * 26)];
 }
 io.on('connection', (socket) => {
-  ships[currentId++] = {x: 0, y: 0, angle: 0, particles: [], callsign: randomLetter() + randomLetter() + randomLetter(), id: currentId - 1};
+	ships[currentId++] = {x: 0, y: 0, angle: 0, particles: [], callsign: randomLetter() + randomLetter() + randomLetter(), id: currentId - 1, speed: 0};
 	socket.emit('id-reveal', {id: currentId - 1, callsign: ships[currentId - 1].callsign});
 	var shipid = currentId - 1;
-  console.log('a user connected');
+	console.log(`${ships[shipid].callsign} #${shipid} joined`);
 	socket.broadcast.emit('ship join', ships[shipid]);
 	socket.on('position change', (newpos) => {
 		ships[shipid].x = newpos.x;
 		ships[shipid].y = newpos.y;
 		ships[shipid].angle = newpos.angle;
+		ships[shipid].currentSpeed = newpos.speed;
 		socket.broadcast.emit('ship change', {id: shipid, ship: ships[shipid]});
+	});
+	socket.on('angle change', (newang) => {
+		ships[shipid].angle = newang;
+		socket.broadcast.emit('angle change', {id: shipid, angle: newang});
 	})
 	socket.on('ship request', () => {
 		var clone = JSON.parse(JSON.stringify(ships));
 		delete clone[shipid];
 		socket.emit('ship get', clone);
 	})
-  socket.on('disconnect', () => {
-	  console.log('disconnect');
-	  delete ships[shipid];
-  });
+	socket.on('disconnect', () => {
+		console.log(`${ships[shipid].callsign} #${shipid} left`);
+		delete ships[shipid];
+	});
 });
 
 // listen for requests :)

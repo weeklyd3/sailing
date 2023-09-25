@@ -47,9 +47,9 @@ class ship extends gameObject {
 		});
 		canvas.pop();
 	}
-	draw(cx, cy, canvas, scale) {
+	draw(cx, cy, canvas, scale, particles = true) {
 		this.drawParticles(cx, cy, canvas, scale);
-		if (this.currentSpeed) {
+		if (this.currentSpeed && particles) {
 			var newpos = this.movePointAtAngle([this.x, this.y], this.angle, this.currentSpeed);
 			[this.x, this.y] = newpos;
 			var head = this.movePointAtAngle([this.x, this.y], this.angle, this.height / 2 + 10);

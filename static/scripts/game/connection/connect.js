@@ -22,5 +22,12 @@ socket.on('ship change', (interaction) => {
 	toChange.y = interaction.ship.y;
 	toChange.targetAngle = interaction.ship.angle;
 	toChange.angle = interaction.ship.angle;
+	toChange.currentSpeed = interaction.ship.currentSpeed;
+})
+socket.on('angle change', (interaction) => {
+	if (typeof currentGame == 'undefined') return;
+	ssi.currentShips[interaction.id].angle = interaction.angle;
+	currentGame.shipCache[interaction.id].targetAngle = interaction.angle;
+	currentGame.shipCache[interaction.id].angle = interaction.angle;
 })
 socket.emit('ship request');
