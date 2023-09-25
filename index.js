@@ -23,15 +23,14 @@ function randomLetter() {
 	return 'ASDFGHJKLZXCVBNMQWERTYUIOP'[Math.floor(Math.random() * 26)];
 }
 io.on('connection', (socket) => {
-	ships[currentId++] = {x: 0, y: 0, angle: 0, particles: [], callsign: randomLetter() + randomLetter() + randomLetter(), id: currentId - 1, speed: 0};
-	socket.emit('id-reveal', {id: currentId - 1, callsign: ships[currentId - 1].callsign});
-	var shipid = currentId - 1;
+	var shipid = String(Math.round(Date.now() / 1000) % 10000000) + String(currentId++ % 10000);
+	ships[shipid] = {x: 0, y: 0, angle: 0, particles: [], callsign: randomLetter() + randomLetter() + randomLetter(), id: shipid, speed: 0};
+	socket.emit('id-reveal', {id: shipid, callsign: ships[shipid].callsign});
 	console.log(`${ships[shipid].callsign} #${shipid} joined`);
 	socket.broadcast.emit('ship join', ships[shipid]);
 	socket.on('position change', (newpos) => {
 		ships[shipid].x = newpos.x;
 		ships[shipid].y = newpos.y;
-		ships[shipid].angle = newpos.angle;
 		ships[shipid].currentSpeed = newpos.speed;
 		socket.broadcast.emit('ship change', {id: shipid, ship: ships[shipid]});
 	});

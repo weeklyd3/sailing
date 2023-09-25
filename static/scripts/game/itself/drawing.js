@@ -27,14 +27,6 @@ class drawing {
 		this.game.ship.currentSpeed += speedChange * 0.1;
 		if (this.game.ship.currentSpeed < 0) this.game.ship.currentSpeed = 0;
 		if (this.game.ship.currentSpeed > this.game.ship.maxSpeed) this.game.ship.currentSpeed = this.game.ship.maxSpeed;
-		if (!(this.fcount % 5)) {
-			this.lastTransmittedAngle = this.angle;
-			socket.emit('position change', {x: this.game.ship.x, y: this.game.ship.y, angle: this.game.ship.angle, speed: this.game.ship.currentSpeed});
-		}
-		if (this.angle != this.lastTransmittedAngle) {
-			this.lastTransmittedAngle = this.angle;
-			socket.emit('angle change', this.angle);
-		}
 	}
 	drawBackgroundAndShip() {
 		this.shortcuts();
@@ -48,7 +40,7 @@ class drawing {
 		this.canvas.fill('black');
 		this.canvas.text(`[${this.game.ship.x.toFixed(2)}, ${this.game.ship.y.toFixed(2)}]\nSpeed: ${this.game.ship.currentSpeed}\n${ssi.id ? `${ssi.callsign} #${ssi.id}` : ''}`, 0, 0);
 		for (const f of Object.values(this.game.shipCache)) f.draw(this.game.ship.x, this.game.ship.y, this.canvas, this.game.scale, false);
-		if (this.game.ship) this.game.ship.draw(this.game.ship.x, this.game.ship.y, this.canvas, this.game.scale);
+		if (this.game.ship) this.game.ship.draw(this.game.ship.x, this.game.ship.y, this.canvas, this.game.scale, true, true);
 	}
 }
 module.exports = drawing;

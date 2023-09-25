@@ -19,6 +19,7 @@ class gameObject {
 	}
 }
 class ship extends gameObject {
+	fcount = 0;
 	constructor(w, h, speed, image, maxspeed, x = 0, y = 0) {
 		super(x, y, w, h, 'ship', image, speed);
 		this.turningSpeed = 1;
@@ -47,7 +48,15 @@ class ship extends gameObject {
 		});
 		canvas.pop();
 	}
-	draw(cx, cy, canvas, scale, particles = true) {
+	draw(cx, cy, canvas, scale, particles = true, isMe = false) {
+		this.fcount++;
+		if (isMe) {
+			if (!(this.fcount % 5)) socket.emit('position change', {x: this.x, y: this.y, speed: this.currentSpeed});
+			if (this.angle != this.lastTransmittedAngle || !(this.fcount % 20)) {
+				this.lastTransmittedAngle = this.angle;
+				socket.emit('angle change', this.angle);
+			}
+		}
 		this.drawParticles(cx, cy, canvas, scale);
 		if (this.currentSpeed) {
 			var newpos = this.movePointAtAngle([this.x, this.y], this.angle, this.currentSpeed);
