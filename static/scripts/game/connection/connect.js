@@ -13,6 +13,31 @@ socket.on('ship get', (ships) => {
 socket.on('ship join', (ship) => {
 	ssi.foreignShips[ship.id] = ship;
 });
+socket.on('chat message', (interaction) => {
+	console.log(interaction);
+	const msg = document.createElement('div');
+	msg.style.whiteSpace = 'pre-wrap';
+	const whoDidIt = document.createElement('strong');
+	whoDidIt.textContent = interaction.callsign + ':';
+	whoDidIt.innerHTML += '&nbsp;';
+	msg.appendChild(whoDidIt);
+	msg.appendChild(document.createTextNode(interaction.data));
+	if (interaction.sentTo != undefined) {
+		var sentTo = document.createElement('small');
+		sentTo.style.display = 'block';
+		sentTo.style.color = 'darkgray';
+		sentTo.textContent = `sent to ${interaction.sentTo} other players`;
+		msg.appendChild(sentTo);
+	}
+	if (interaction.locationData) {
+		var ldata = document.createElement('small');
+		ldata.style.display = 'block';
+		ldata.textContent = `Last known position: [${interaction.locationData.x.toFixed(2)}, ${interaction.locationData.y.toFixed(2)}], angle: ${interaction.locationData.angle}`;
+		msg.appendChild(ldata);
+	}
+	if (interaction.isCall) msg.style.color = 'red';
+	document.querySelector('.chat .container').appendChild(msg);
+});
 socket.on('ship change', (interaction) => {
 	console.log(`position change for id ${interaction.id}`);
 	if (typeof currentGame == 'undefined') return;
