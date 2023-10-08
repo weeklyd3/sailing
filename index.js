@@ -7,6 +7,25 @@ const { log } = require('./logger');
 app.get('/', function(request, response) {
   response.sendFile(__dirname + '/static/index.html');
 });
+app.get('/objectBundle.js', function(req, res) {
+	var output = `// Generated to have all starting objects.\nvar startingObjects=`;
+	const result = [];
+	const areas = [];
+	for (var i = -3; i < 4; i++) {
+		for (var j = -3; j < 4; j++) {
+			const zoneId = btoa(i + '|' + j);
+			var r = loader.load(zoneId);
+			areas.push(btoa(i + '|' + j));
+			if (r.none) continue;
+			result.push(...r.objects);
+		}
+	}
+	output += JSON.stringify(result) + ';';
+	output += `var loadedAreas=`;
+	output += JSON.stringify(areas) + ';';
+	res.type('.js');
+	res.send(output);
+})
 app.get('/objects/:coord', function(req, res) {
   res.type('json');
   const obj = {};
@@ -42,8 +61,11 @@ io.on('connection', (socket) => {
 		socket.broadcast.emit('angle change', {id: shipid, angle: newang});
 	})
 	socket.on('objects load', (zones) => {
+		if (!zones.length) return;
 		const result = [];
 		for (const z of zones) result.push(loader.load(z));
+		log(`Loaded ${result.length} objects for zones:`, 1);
+		log(zones, 1);
 		socket.emit('objects load', result);
 	})
 	socket.on('ship request', () => {

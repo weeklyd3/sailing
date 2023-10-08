@@ -5,6 +5,8 @@ class gameInfo {
 		this.objects = [];
 		this.loadedZones = [];
 		this.loadingZones = [];
+		if (typeof startingObjects !== 'undefined') this.objects = startingObjects;
+		if (typeof loadedAreas !== 'undefined') this.loadedZones = loadedAreas;
 		socket.on('objects load', this.gotObjects.bind(this));
 	}
 	gotObjects(objects) {
@@ -29,6 +31,7 @@ class gameInfo {
 		const unloadZones = [];
 		this.objects = this.objects.filter((o) => {
 			if (unloadZones.indexOf(o.zone) != -1) return false;
+			if (this.loadedZones.indexOf(o.zone) == -1) this.loadedZones.push(o.zone);
 			const zone = this.parseZone(o.zone);
 			const xdiff = Math.abs(zone[0] - zoneInfo[0]);
 			const ydiff = Math.abs(zone[1] - zoneInfo[1]);
