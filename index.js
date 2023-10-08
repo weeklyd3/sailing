@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
-
+const loader = require('./loader');
+if (loader.shouldInvalidateCache()) loader.cacheObjects();
 app.use(express.static('./static'));
-
+const { log } = require('./logger');
 app.get('/', function(request, response) {
   response.sendFile(__dirname + '/static/index.html');
 });
@@ -28,7 +29,7 @@ io.on('connection', (socket) => {
 	ships[shipid] = {x: 0, y: 0, angle: 0, particles: [], callsign: randomLetter() + randomLetter() + randomLetter(), id: shipid, speed: 0};
 	shipSockets[shipid] = socket;
 	socket.emit('id-reveal', {id: shipid, callsign: ships[shipid].callsign});
-	console.log(`${ships[shipid].callsign} #${shipid} joined`);
+	log(`${ships[shipid].callsign} #${shipid} joined`);
 	socket.broadcast.emit('ship join', ships[shipid]);
 	socket.on('position change', (newpos) => {
 		ships[shipid].x = newpos.x;
@@ -40,6 +41,11 @@ io.on('connection', (socket) => {
 		ships[shipid].angle = newang;
 		socket.broadcast.emit('angle change', {id: shipid, angle: newang});
 	})
+	socket.on('objects load', (zones) => {
+		const result = [];
+		for (const z of zones) result.push(loader.load(z));
+		socket.emit('objects load', result);
+	})
 	socket.on('ship request', () => {
 		var clone = JSON.parse(JSON.stringify(ships));
 		delete clone[shipid];
@@ -47,7 +53,7 @@ io.on('connection', (socket) => {
 	});
 	socket.on('chat message', (data) => {
 		const radioRange = 20000;
-		console.log(`${ships[shipid].callsign}: ${data}`);
+		log(`${ships[shipid].callsign}: ${data}`, 1);
 		var sentTo = 0;
 		const distressData = {isCall: false};
 		const distressPattern = /peanut butter/g;
@@ -66,18 +72,18 @@ io.on('connection', (socket) => {
 			var distance = Math.sqrt((ship.x - ships[shipid].x) ** 2 + (ship.y - ships[shipid].y) ** 2);
 			if (distance > radioRange) continue;
 			sentTo++;
-			console.log(`sending to ${ship.callsign}`);
+			log(`sending to ${ship.callsign}`, 3);
 			shipSockets[id].emit('chat message', {...distressData, from: shipid, callsign: ships[shipid].callsign, data: data});
 		}
 		socket.emit('chat message', {...distressData, from: shipid, callsign: ships[shipid].callsign, data: data, sentTo: sentTo});
 	});
 	socket.on('disconnect', () => {
-		console.log(`${ships[shipid].callsign} #${shipid} left`);
+		log(`${ships[shipid].callsign} #${shipid} left`);
 		delete ships[shipid];
 	});
 });
 
 // listen for requests :)
 const listener = server.listen(4000, function() {
-  console.log('Your app is listening on port ' + listener.address().port);
+  log('Your app is listening on port ' + listener.address().port, 1);
 });

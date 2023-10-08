@@ -27,6 +27,8 @@ class drawing {
 		this.game.ship.currentSpeed += speedChange * 0.1;
 		if (this.game.ship.currentSpeed < 0) this.game.ship.currentSpeed = 0;
 		if (this.game.ship.currentSpeed > this.game.ship.maxSpeed) this.game.ship.currentSpeed = this.game.ship.maxSpeed;
+
+		if (!(this.fcount % 30)) this.game.gameInfo.loadAndUnload(this.game.gameInfo.toZone(this.game.ship.x, this.game.ship.y));
 	}
 	drawBackgroundAndShip() {
 		this.shortcuts();
