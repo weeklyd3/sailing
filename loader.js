@@ -37,6 +37,10 @@ function cacheObjects(logThis = true) {
 	const zones = new Map();
 	var done = 0;
 	for (const object of world.objects) {
+		var stats = {angle: 0};
+		for (const stat in stats) {
+			if (!object.hasOwnProperty(stat)) object[stat] = stats[stat];
+		}
 		internalLog(`Done: ${done}\r`, 1);
 		const zoneid = getZoneOfCoordinate(object.x, object.y);
 		const bounds = getZoneBounds(object.x, object.y);

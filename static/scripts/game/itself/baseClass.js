@@ -10,7 +10,7 @@ class game {
 		this.target = [10000, -1000];
 		this.canvasInfo.width = width;
 		this.canvasInfo.height = height;
-		this.gameInfo = new gameInfo(game);
+		this.gameInfo = new gameInfo(this);
 		var s = function(sketch) {
 			sketch.setup = function() {
 				sketch.createCanvas(width, height);
@@ -23,6 +23,9 @@ class game {
 		this.updateLoop();
 		this.shipimg = draw.loadImage("images/ship.svg");
 		this.ship = new objects.ship(75, 320, 0, this.shipimg, 9);
+	}
+	changeShip(fname) {
+		this.canvas.loadImage(`images/${fname}.svg`, this.ship.change.bind(this.ship));
 	}
 	updateLoop(fps = 30) {
 		return setInterval(this.updateCanvas.bind(this), fps);

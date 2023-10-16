@@ -41,8 +41,28 @@ class drawing {
 		this.canvas.textAlign('left', 'top');
 		this.canvas.fill('black');
 		this.canvas.text(`[${this.game.ship.x.toFixed(2)}, ${this.game.ship.y.toFixed(2)}]\nSpeed: ${this.game.ship.currentSpeed}\n${ssi.id ? `${ssi.callsign} #${ssi.id}` : ''}`, 0, 0);
+		this.drawObjects();
 		for (const f of Object.values(this.game.shipCache)) f.draw(this.game.ship.x, this.game.ship.y, this.canvas, this.game.scale, false);
 		if (this.game.ship) this.game.ship.draw(this.game.ship.x, this.game.ship.y, this.canvas, this.game.scale, true, true);
+	}
+	drawObjects() {
+		for (const object of this.game.gameInfo.objects) {
+			this.drawObject(this.game.ship.x, this.game.ship.y, object);
+		}
+	}
+	drawObject(cx, cy, object) {
+		var scale = this.game.scale;
+		var canvas = this.canvas;
+		canvas.push();
+		canvas.translate(
+			(object.x + object.width / 2 - cx) * scale + canvas.width / 2,
+			(object.y + object.height / 2 - cy) * scale + canvas.height / 2
+		);
+		canvas.rotate(object.angle);
+		var image = this.game.gameInfo.objectData[object.type].image;
+		if (!image) return;
+		canvas.image(image, -object.width / 2 * scale, -object.height / 2 * scale, object.width * scale, object.height * scale);
+		canvas.pop();
 	}
 }
 module.exports = drawing;

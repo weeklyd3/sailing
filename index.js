@@ -1,14 +1,29 @@
 const express = require('express');
 const app = express();
 const loader = require('./loader');
+const fs = require('fs');
 if (loader.shouldInvalidateCache()) loader.cacheObjects();
 app.use(express.static('./static'));
 const { log } = require('./logger');
 app.get('/', function(request, response) {
   response.sendFile(__dirname + '/static/index.html');
 });
+objectInfoBundle = '';
+const objectTypes = JSON.parse(fs.readFileSync('objectTypes.json'));
+for (const k in objectTypes) {
+	var defaultType = {
+		tileMode: 'stretch',
+		image: k + '.svg',
+	};
+	for (const tk in defaultType) {
+		if (!objectTypes[k].hasOwnProperty(tk)) objectTypes[k][tk] = defaultType[tk];
+	}
+	const contents = fs.readFileSync(`static/images/objects/${objectTypes[k].image}`);
+	objectTypes[k].imageData = `data:image/svg+xml;base64,${encodeURIComponent(btoa(contents))}`;
+}
+objectInfoBundle = `const objectData = ${JSON.stringify(objectTypes, null, 4)}`;
 app.get('/objectBundle.js', function(req, res) {
-	var output = `// Generated to have all starting objects.\nvar startingObjects=`;
+	var output = `// Generated to have all starting objects.\nvar startingObjects = `;
 	const result = [];
 	const areas = [];
 	for (var i = -3; i < 4; i++) {
@@ -20,9 +35,11 @@ app.get('/objectBundle.js', function(req, res) {
 			result.push(...r.objects);
 		}
 	}
-	output += JSON.stringify(result) + ';';
-	output += `var loadedAreas=`;
-	output += JSON.stringify(areas) + ';';
+	output += JSON.stringify(result, null, 4) + ';\n';
+	output += `var loadedAreas = `;
+	output += JSON.stringify(areas, null, 4) + ';\n';
+	output += objectInfoBundle + ';\n';
+	output += `module.exports = {loadedAreas, startingObjects, objectData}`;
 	res.type('.js');
 	res.send(output);
 })
@@ -64,7 +81,7 @@ io.on('connection', (socket) => {
 		if (!zones.length) return;
 		const result = [];
 		for (const z of zones) result.push(loader.load(z));
-		log(`Loaded ${result.length} objects for zones:`, 1);
+		log(`Loaded ${result.length} zones:`, 1);
 		log(zones, 1);
 		socket.emit('objects load', result);
 	})

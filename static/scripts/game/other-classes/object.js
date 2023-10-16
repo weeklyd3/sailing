@@ -27,6 +27,11 @@ class ship extends gameObject {
 		this.currentSpeed = 0;
 		this.maxSpeed = maxspeed;
 	}
+	normalizeAngle(angle) {
+		while (angle < 0) angle += 360;
+		while (angle >= 360) angle -= 360;
+		return angle;
+	}
 	turn(angle) {
 		this.targetAngle = angle;
 	}
@@ -95,6 +100,11 @@ class ship extends gameObject {
 		const shipHeight = this.height * scale;
 		canvas.image(this.image, -shipWidth / 2, -shipHeight / 2, shipWidth, shipHeight);
 		canvas.pop();
+	}
+	change(img) {
+		this.image = img;
+		this.width = img.width;
+		this.height = img.height;
 	}
 }
 module.exports = {gameObject, ship};

@@ -1,3 +1,4 @@
+const bundle = await require('../objectBundle.js');
 class gameInfo {
 	constructor(game) {
 		this.game = game;
@@ -5,9 +6,18 @@ class gameInfo {
 		this.objects = [];
 		this.loadedZones = [];
 		this.loadingZones = [];
-		if (typeof startingObjects !== 'undefined') this.objects = startingObjects;
-		if (typeof loadedAreas !== 'undefined') this.loadedZones = loadedAreas;
+		this.objects = bundle.startingObjects;
+		this.loadedZones = bundle.loadedAreas;
+		this.objectData = bundle.objectData;
 		socket.on('objects load', this.gotObjects.bind(this));
+		setTimeout(this.loadObjectImages.bind(this), 1);
+	}
+	loadObjectImages() {
+		console.log(this.game);
+		for (const o in this.objectData) {
+			var imgurl = this.objectData[o].imageData;
+			this.objectData[o].image = this.game.canvas.loadImage(imgurl);
+		}
 	}
 	gotObjects(objects) {
 		for (const pkg of objects) {
